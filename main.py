@@ -1,6 +1,7 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 app = FastAPI()
 
@@ -63,6 +64,14 @@ def test_database():
     response["database_name"] = "✅ Set" if os.getenv("DATABASE_NAME") else "❌ Not Set"
     
     return response
+
+@app.get("/download/backend-source")
+def download_backend_source():
+    """Serve the backend source archive for download."""
+    archive_path = os.path.abspath("public/backend-source.tar.gz")
+    if not os.path.exists(archive_path):
+        raise HTTPException(status_code=404, detail="Archive not found. Please ask to regenerate.")
+    return FileResponse(archive_path, media_type="application/gzip", filename="backend-source.tar.gz")
 
 
 if __name__ == "__main__":
